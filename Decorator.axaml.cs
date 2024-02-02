@@ -38,23 +38,25 @@ public partial class Decorator : UserControl
         InitializeComponent();
         _targetControl = targetControl;
         _layer = layer;
-        
-        //Делаем контрол неактивным
-        
+       
         _targetControl.AddHandler(PointerPressedEvent, (sender, e) =>
         {
-            var control = (Control)e.Source;
-            if (control.TemplatedParent != null)
-            {
-                Console.WriteLine(control.TemplatedParent);
-            }
-            else
-            {
-                Console.WriteLine(control);
-            }
-           
+            //А тут вернется Stack Panel
+              Console.WriteLine(sender);
+            
             e.Handled = true;
-        }, RoutingStrategies.Tunnel );
+        }, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        
+        _targetControl.AddHandler(
+            TappedEvent,
+            (sender, e) =>
+            {
+                //Тут все ок
+                Console.WriteLine(sender);
+                e.Handled = true;
+            },
+            routes:  RoutingStrategies.Tunnel | RoutingStrategies.Bubble );
+        
        // _targetControl.AddHandler(PointerReleasedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble );
         //_targetControl.AddHandler(PointerMovedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         //_targetControl.AddHandler(PointerEnteredEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
