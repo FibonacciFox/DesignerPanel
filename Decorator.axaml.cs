@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -38,26 +39,21 @@ public partial class Decorator : UserControl
         InitializeComponent();
         _targetControl = targetControl;
         _layer = layer;
-       
-        _targetControl.AddHandler(PointerPressedEvent, (sender, e) =>
-        {
-            //А тут вернется Stack Panel
-              Console.WriteLine(sender);
-            
-            e.Handled = true;
-        }, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         
-        _targetControl.AddHandler(
-            TappedEvent,
-            (sender, e) =>
-            {
-                //Тут все ок
-                Console.WriteLine(sender);
-                e.Handled = true;
-            },
-            routes:  RoutingStrategies.Tunnel | RoutingStrategies.Bubble );
         
-       // _targetControl.AddHandler(PointerReleasedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble );
+        // _targetControl.AddHandler(PointerPressedEvent, (sender, e) =>
+        // {
+        //     var control = e.Source as Control;
+        //     var parent = control;
+        //     
+        //     Console.WriteLine(parent);
+        //     
+        //     e.Handled = true;
+        // }, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        
+        
+        
+        //_targetControl.AddHandler(PointerReleasedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble );
         //_targetControl.AddHandler(PointerMovedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         //_targetControl.AddHandler(PointerEnteredEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         //_targetControl.AddHandler(KeyUpEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
