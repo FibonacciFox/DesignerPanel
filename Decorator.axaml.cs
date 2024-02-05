@@ -48,12 +48,20 @@ public partial class Decorator : UserControl
             var control = e.Source as Control;
 
             Console.WriteLine(control?.Name);
-
-           
+            
             e.Handled = true;
         }, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         
         
+        _targetControl.AddHandler(TappedEvent, (sender, e) =>
+        {
+
+            var control = sender as Control;
+
+            Console.WriteLine(control?.Name);
+            
+            e.Handled = true;
+        }, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         
         //_targetControl.AddHandler(PointerReleasedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble );
         _targetControl.AddHandler(PointerMovedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
