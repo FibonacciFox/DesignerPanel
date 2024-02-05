@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.Media;
 using Avalonia.VisualTree;
 
 namespace DesignerPanel;
@@ -39,23 +40,24 @@ public partial class Decorator : UserControl
         InitializeComponent();
         _targetControl = targetControl;
         _layer = layer;
+
         
-        
-        // _targetControl.AddHandler(PointerPressedEvent, (sender, e) =>
-        // {
-        //     var control = e.Source as Control;
-        //     var parent = control;
-        //     
-        //     Console.WriteLine(parent);
-        //     
-        //     e.Handled = true;
-        // }, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        _targetControl.AddHandler(PointerPressedEvent, (sender, e) =>
+        {
+
+            var control = e.Source as Control;
+
+            Console.WriteLine(control?.Name);
+
+           
+            e.Handled = true;
+        }, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         
         
         
         //_targetControl.AddHandler(PointerReleasedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble );
-        //_targetControl.AddHandler(PointerMovedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        //_targetControl.AddHandler(PointerEnteredEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        _targetControl.AddHandler(PointerMovedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        _targetControl.AddHandler(PointerEnteredEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         //_targetControl.AddHandler(KeyUpEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         //_targetControl.AddHandler(KeyDownEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         

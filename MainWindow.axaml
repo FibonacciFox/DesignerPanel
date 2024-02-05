@@ -8,12 +8,12 @@
         Title="DesignerPanel">
     <Panel>
         <Panel Name="DesignPanel">
-            <StackPanel Name="MyStackPanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="300" Width="300" Background="Coral">
-                <TextBox Name="MyTextBox">Hello</TextBox>
-                <Button Name="MyTextButton" VerticalAlignment="Center">Hello</Button>
-                <TextBox Name="MyTextBox2" VerticalAlignment="Center">>Hello</TextBox>
-                <NumericUpDown Value="10" />
-            </StackPanel>
+            <Panel Name="MyPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Height="300" Width="300" Background="Coral">
+                <StackPanel  Spacing="5" Width="200" Height="200" Orientation="Horizontal" Background="Chocolate" Name="MyStackPanel">
+                    <Button Name="MyButton"> MyButton</Button>
+                    <TextBox VerticalAlignment="Center" Name="MyTextBox"> My Text Box</TextBox>
+                </StackPanel>
+            </Panel>
         </Panel>
         <Canvas Name="AdornerPanel"/>
     </Panel>
