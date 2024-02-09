@@ -1,12 +1,10 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.LogicalTree;
-using Avalonia.Media;
-using Avalonia.VisualTree;
+using Avalonia.Layout;
 
 namespace DesignerPanel;
 
@@ -16,7 +14,7 @@ public partial class Decorator : UserControl
     /// Defines the <see cref="IsSelected"/> property.
     /// </summary>
     public static readonly StyledProperty<bool> IsSelectedProperty =
-        AvaloniaProperty.Register<Decorator, bool>(nameof(IsSelected), defaultValue: true);
+        AvaloniaProperty.Register<Decorator, bool>(nameof(IsSelected), defaultValue: false);
 
     /// <summary>
     /// Returns or sets a value indicating whether the target control is selected for editing.
@@ -34,40 +32,60 @@ public partial class Decorator : UserControl
     {
         InitializeComponent();
     }
+
+    public Panel _propertyLayer;
     
-    public Decorator(Control targetControl , Canvas layer)
+    public Decorator(Control targetControl , Canvas layer , Panel propertyLayer)
     {
         InitializeComponent();
         _targetControl = targetControl;
         _layer = layer;
-
+        _propertyLayer = propertyLayer;
         
         _targetControl.AddHandler(PointerPressedEvent, (sender, e) =>
         {
-
-            var control = e.Source as Control;
-
-            Console.WriteLine(control?.Name);
+            Console.WriteLine(sender);
             
-            e.Handled = true;
-        }, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        
-        
-        _targetControl.AddHandler(TappedEvent, (sender, e) =>
-        {
-
-            var control = sender as Control;
-
-            Console.WriteLine(control?.Name);
+            foreach (var child in layer.Children)
+            { 
+                var control = child as Decorator;
+                    control.IsSelected = false;
+                    var propertys = GetAvaloniaProperties(sender);
+                    _propertyLayer.Children.Clear();
+                    foreach (var property in propertys)
+                    {
+                        if (!property.IsReadOnly)
+                        {
+                           // Console.WriteLine($"{property.Name}: {_targetControl.GetValue(property)} - ReadOnly: {property.IsReadOnly}");
+                            var st_panel = new StackPanel();
+                            st_panel.Orientation = Orientation.Horizontal;
+                            st_panel.Children.Add(new TextBlock()
+                            {
+                                Text = property.Name
+                            });
+                            st_panel.Children.Add(new TextBox()
+                            {
+                                Text = _targetControl.GetValue(property)?.ToString()
+                            });
+                            _propertyLayer.Children.Add(st_panel);
+                        }
+                    }
+               
+            }
             
+            IsSelected = true;
             e.Handled = true;
-        }, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        },  RoutingStrategies.Tunnel , true );
         
-        //_targetControl.AddHandler(PointerReleasedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble );
+        
+        
+        _targetControl.AddHandler(PointerReleasedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble );
         _targetControl.AddHandler(PointerMovedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         _targetControl.AddHandler(PointerEnteredEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        //_targetControl.AddHandler(KeyUpEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        //_targetControl.AddHandler(KeyDownEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        
+        
+        _targetControl.AddHandler(KeyUpEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        _targetControl.AddHandler(KeyDownEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
         
         //Cобытие возникает, когда контрол был размещен и его размеры были определены.
         _targetControl.LayoutUpdated += TargetControlOnLayoutUpdated;
@@ -84,6 +102,11 @@ public partial class Decorator : UserControl
         //
     }
     
+    private static IEnumerable<AvaloniaProperty> GetAvaloniaProperties(object o)
+    {
+        var ao = o as AvaloniaObject;
+       return AvaloniaPropertyRegistry.Instance.GetRegistered(ao);
+    }
     
     private void AnchorOnPointerPressed(object? sender, PointerPressedEventArgs e)
     {

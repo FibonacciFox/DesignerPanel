@@ -1,6 +1,6 @@
 using Avalonia.Interactivity;
 
-namespace DesignerControlApp;
+namespace DesignerPanel;
 
 public class SelectedEventArgs : RoutedEventArgs
 {
