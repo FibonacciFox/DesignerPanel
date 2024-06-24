@@ -7,20 +7,11 @@
         Width="800" Height="600"
         Title="DesignerPanel">
     <DockPanel>
-        <StackPanel Name="PropertyLayer"  Width="200" DockPanel.Dock="Left">
-            
-        </StackPanel>
-        <Panel ClipToBounds="True"  >
-            <Panel  Name="DesignPanel" Background="SlateGray">
-                <Panel  Name="MyPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Coral">
-                    <StackPanel  Spacing="5" Width="300" Height="200" Orientation="Horizontal" Background="Chocolate" Name="MyStackPanel">
-                        <Button  Name="MyButton">MyButton</Button>
-                        <TextBox VerticalAlignment="Center" Name="MyTextBox"> My Text Box</TextBox>
-                    </StackPanel>
-                </Panel>
-            </Panel>
+        <Panel ClipToBounds="True">
+            <Canvas Name="DesignPanel" Background="SlateGray">
+                <TextBox Canvas.Top="200" Canvas.Left="300" VerticalAlignment="Center" Name="MyTextBox"> My Text Box</TextBox>
+            </Canvas>
             <Canvas Name="AdornerPanel"/>
         </Panel>
     </DockPanel>
-   
 </Window>

@@ -7,28 +7,27 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
 
-namespace DesignerPanel;
-
-public partial class MainWindow : Window
+namespace DesignerPanel
 {
-    public MainWindow()
+    public partial class MainWindow : Window
     {
-        InitializeComponent();
-        AddAttached(DesignPanel);
-        
-    }
-
-    public void AddAttached(Panel panel)
-    {
-        foreach (var child in panel.Children)
+        public MainWindow()
         {
-            AdornerPanel.Children.Add(new Decorator(child, AdornerPanel, PropertyLayer));
-            
-            if (child is Panel childPanel)
+            InitializeComponent();
+            AddAttached(DesignPanel);
+        }
+
+        public void AddAttached(Panel panel)
+        {
+            foreach (var child in panel.Children)
             {
-                AddAttached(childPanel);
+                AdornerPanel.Children.Add(new Decorator(child, AdornerPanel));
+                
+                if (child is Panel childPanel)
+                {
+                    AddAttached(childPanel);
+                }
             }
         }
     }
-    
 }
