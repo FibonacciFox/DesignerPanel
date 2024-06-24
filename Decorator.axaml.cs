@@ -23,9 +23,10 @@ namespace DesignerPanel
         private Control _targetControl;
         private Panel _layer;
         private bool _isResizing;
+        private bool _isDragging;
         private PointerPoint _startSizePoint;
+        private PointerPoint _startDragPoint;
         private string _currentAnchor;
-
         // Default constructor
         public Decorator()
         {
@@ -52,8 +53,8 @@ namespace DesignerPanel
         private void AddPointerHandlers()
         {
             _targetControl.AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Tunnel, true);
-            _targetControl.AddHandler(PointerReleasedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-            _targetControl.AddHandler(PointerMovedEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+            _targetControl.AddHandler(PointerReleasedEvent, OnPointerReleased, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+            _targetControl.AddHandler(PointerMovedEvent, OnPointerMoved, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
             _targetControl.AddHandler(PointerEnteredEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
             _targetControl.AddHandler(KeyUpEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
             _targetControl.AddHandler(KeyDownEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
@@ -108,7 +109,31 @@ namespace DesignerPanel
             }
 
             IsSelected = true;
+
+            _startDragPoint = e.GetCurrentPoint((Visual?)_targetControl.Parent);
+            _isDragging = true;
+
             e.Handled = true;
+        }
+
+        private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            _isResizing = false;
+            _isDragging = false;
+        }
+
+        private void OnPointerMoved(object? sender, PointerEventArgs e)
+        {
+            if (_isDragging)
+            {
+                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
+                var deltaX = point.Position.X - _startDragPoint.Position.X;
+                var deltaY = point.Position.Y - _startDragPoint.Position.Y;
+                Canvas.SetLeft(_targetControl, Canvas.GetLeft(_targetControl) + deltaX);
+                Canvas.SetTop(_targetControl, Canvas.GetTop(_targetControl) + deltaY);
+                _startDragPoint = point;
+                e.Handled = true;
+            }
         }
 
         private void AnchorOnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -134,6 +159,11 @@ namespace DesignerPanel
                 _startSizePoint = point;
                 Console.WriteLine($"Resizing TopLeft: New Width = {_targetControl.Width}, New Height = {_targetControl.Height}");
             }
+        }
+        
+        private void AnchorOnPointerReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            _isResizing = false;
         }
 
         private void LeftCenterAnchorOnPointerMoved(object? sender, PointerEventArgs e)
@@ -238,11 +268,6 @@ namespace DesignerPanel
                 _startSizePoint = point;
                 Console.WriteLine($"Resizing Bottom: New Height = {_targetControl.Height}");
             }
-        }
-
-        private void AnchorOnPointerReleased(object? sender, PointerReleasedEventArgs e)
-        {
-            _isResizing = false;
         }
 
         private void TargetControlOnLayoutUpdated(object? sender, EventArgs e)
