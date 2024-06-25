@@ -19,14 +19,13 @@ namespace DesignerPanel
             set => SetValue(IsSelectedProperty, value);
         }
 
-        // Fields for control and resizing logic
         private Control _targetControl;
         private Panel _layer;
         private bool _isResizing;
         private bool _isDragging;
         private PointerPoint _startSizePoint;
         private PointerPoint _startDragPoint;
-        private string _currentAnchor;
+
         // Default constructor
         public Decorator()
         {
@@ -40,66 +39,37 @@ namespace DesignerPanel
             _targetControl = targetControl;
             _layer = layer;
 
-            // Add handlers for various pointer events
             AddPointerHandlers();
-
-            // Add layout updated event handler
             _targetControl.LayoutUpdated += TargetControlOnLayoutUpdated;
-
-            // Add resize handlers for anchors
             AddAnchorHandlers();
         }
 
         private void AddPointerHandlers()
         {
-            _targetControl.AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Tunnel, true);
-            _targetControl.AddHandler(PointerReleasedEvent, OnPointerReleased, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-            _targetControl.AddHandler(PointerMovedEvent, OnPointerMoved, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-            _targetControl.AddHandler(PointerEnteredEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-            _targetControl.AddHandler(KeyUpEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-            _targetControl.AddHandler(KeyDownEvent, (sender, e) => e.Handled = true, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+            AddHandler(PointerPressedEvent, OnPointerPressed);
+            AddHandler(PointerReleasedEvent, OnPointerReleased);
+            AddHandler(PointerMovedEvent, OnPointerMoved);
         }
 
         private void AddAnchorHandlers()
         {
-            TopLeftAnchor.AddHandler(PointerPressedEvent, AnchorOnPointerPressed, RoutingStrategies.Tunnel);
-            TopLeftAnchor.AddHandler(PointerMovedEvent, TopLeftAnchorOnPointerMoved, RoutingStrategies.Tunnel);
-            TopLeftAnchor.AddHandler(PointerReleasedEvent, AnchorOnPointerReleased, RoutingStrategies.Tunnel);
+            var anchors = new[] 
+            { 
+                TopLeftAnchor, LeftCenterAnchor, BottomLeftAnchor, 
+                TopRightAnchor, RightCenterAnchor, BottomRightAnchor, 
+                TopCenterAnchor, BottomCenterAnchor 
+            };
 
-            LeftCenterAnchor.AddHandler(PointerPressedEvent, AnchorOnPointerPressed, RoutingStrategies.Tunnel);
-            LeftCenterAnchor.AddHandler(PointerMovedEvent, LeftCenterAnchorOnPointerMoved, RoutingStrategies.Tunnel);
-            LeftCenterAnchor.AddHandler(PointerReleasedEvent, AnchorOnPointerReleased, RoutingStrategies.Tunnel);
-
-            BottomLeftAnchor.AddHandler(PointerPressedEvent, AnchorOnPointerPressed, RoutingStrategies.Tunnel);
-            BottomLeftAnchor.AddHandler(PointerMovedEvent, BottomLeftAnchorOnPointerMoved, RoutingStrategies.Tunnel);
-            BottomLeftAnchor.AddHandler(PointerReleasedEvent, AnchorOnPointerReleased, RoutingStrategies.Tunnel);
-
-            TopRightAnchor.AddHandler(PointerPressedEvent, AnchorOnPointerPressed, RoutingStrategies.Tunnel);
-            TopRightAnchor.AddHandler(PointerMovedEvent, TopRightAnchorOnPointerMoved, RoutingStrategies.Tunnel);
-            TopRightAnchor.AddHandler(PointerReleasedEvent, AnchorOnPointerReleased, RoutingStrategies.Tunnel);
-
-            RightCenterAnchor.AddHandler(PointerPressedEvent, AnchorOnPointerPressed, RoutingStrategies.Tunnel);
-            RightCenterAnchor.AddHandler(PointerMovedEvent, RightCenterAnchorOnPointerMoved, RoutingStrategies.Tunnel);
-            RightCenterAnchor.AddHandler(PointerReleasedEvent, AnchorOnPointerReleased, RoutingStrategies.Tunnel);
-
-            BottomRightAnchor.AddHandler(PointerPressedEvent, AnchorOnPointerPressed, RoutingStrategies.Tunnel);
-            BottomRightAnchor.AddHandler(PointerMovedEvent, BottomRightAnchorOnPointerMoved, RoutingStrategies.Tunnel);
-            BottomRightAnchor.AddHandler(PointerReleasedEvent, AnchorOnPointerReleased, RoutingStrategies.Tunnel);
-
-            TopCenterAnchor.AddHandler(PointerPressedEvent, AnchorOnPointerPressed, RoutingStrategies.Tunnel);
-            TopCenterAnchor.AddHandler(PointerMovedEvent, TopCenterAnchorOnPointerMoved, RoutingStrategies.Tunnel);
-            TopCenterAnchor.AddHandler(PointerReleasedEvent, AnchorOnPointerReleased, RoutingStrategies.Tunnel);
-
-            BottomCenterAnchor.AddHandler(PointerPressedEvent, AnchorOnPointerPressed, RoutingStrategies.Tunnel);
-            BottomCenterAnchor.AddHandler(PointerMovedEvent, BottomCenterAnchorOnPointerMoved, RoutingStrategies.Tunnel);
-            BottomCenterAnchor.AddHandler(PointerReleasedEvent, AnchorOnPointerReleased, RoutingStrategies.Tunnel);
+            foreach (var anchor in anchors)
+            {
+                anchor.AddHandler(PointerPressedEvent, AnchorOnPointerPressed, RoutingStrategies.Tunnel);
+                anchor.AddHandler(PointerMovedEvent, AnchorOnPointerMoved, RoutingStrategies.Tunnel);
+                anchor.AddHandler(PointerReleasedEvent, AnchorOnPointerReleased, RoutingStrategies.Tunnel);
+            }
         }
 
         private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            Console.WriteLine(sender);
-
-            // Iterate over children of the layer and deselect all decorators
             foreach (var child in _layer.Children)
             {
                 if (child is Decorator decorator)
@@ -109,11 +79,8 @@ namespace DesignerPanel
             }
 
             IsSelected = true;
-
             _startDragPoint = e.GetCurrentPoint((Visual?)_targetControl.Parent);
             _isDragging = true;
-
-            e.Handled = true;
         }
 
         private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -126,153 +93,79 @@ namespace DesignerPanel
         {
             if (_isDragging)
             {
-                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-                var deltaX = point.Position.X - _startDragPoint.Position.X;
-                var deltaY = point.Position.Y - _startDragPoint.Position.Y;
-                Canvas.SetLeft(_targetControl, Canvas.GetLeft(_targetControl) + deltaX);
-                Canvas.SetTop(_targetControl, Canvas.GetTop(_targetControl) + deltaY);
-                _startDragPoint = point;
-                e.Handled = true;
+                MoveControl(e);
             }
+        }
+
+        private void MoveControl(PointerEventArgs e)
+        {
+            var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
+            var deltaX = point.Position.X - _startDragPoint.Position.X;
+            var deltaY = point.Position.Y - _startDragPoint.Position.Y;
+
+            Canvas.SetLeft(_targetControl, Canvas.GetLeft(_targetControl) + deltaX);
+            Canvas.SetTop(_targetControl, Canvas.GetTop(_targetControl) + deltaY);
+
+            _startDragPoint = point;
+            e.Handled = true;
         }
 
         private void AnchorOnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             _isResizing = true;
             _startSizePoint = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-            _currentAnchor = ((Control)sender!).Name;
         }
 
-        private void TopLeftAnchorOnPointerMoved(object? sender, PointerEventArgs e)
-        {
-            if (_isResizing)
-            {
-                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-                var deltaX = _startSizePoint.Position.X - point.Position.X;
-                var deltaY = _startSizePoint.Position.Y - point.Position.Y;
-                double newWidth = Math.Max(0, (_targetControl.Width.Equals(double.NaN) ? _targetControl.DesiredSize.Width : _targetControl.Width) + deltaX);
-                double newHeight = Math.Max(0, (_targetControl.Height.Equals(double.NaN) ? _targetControl.DesiredSize.Height : _targetControl.Height) + deltaY);
-                _targetControl.Width = newWidth;
-                _targetControl.Height = newHeight;
-                Canvas.SetLeft(_targetControl, Canvas.GetLeft(_targetControl) - deltaX);
-                Canvas.SetTop(_targetControl, Canvas.GetTop(_targetControl) - deltaY);
-                _startSizePoint = point;
-                Console.WriteLine($"Resizing TopLeft: New Width = {_targetControl.Width}, New Height = {_targetControl.Height}");
-            }
-        }
-        
         private void AnchorOnPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
             _isResizing = false;
         }
 
-        private void LeftCenterAnchorOnPointerMoved(object? sender, PointerEventArgs e)
+        private void AnchorOnPointerMoved(object? sender, PointerEventArgs e)
         {
-            if (_isResizing)
-            {
-                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-                var delta = _startSizePoint.Position.X - point.Position.X;
-                double newWidth = Math.Max(0, (_targetControl.Width.Equals(double.NaN) ? _targetControl.DesiredSize.Width : _targetControl.Width) + delta);
-                _targetControl.Width = newWidth;
-                Canvas.SetLeft(_targetControl, Canvas.GetLeft(_targetControl) - delta);
-                _startSizePoint = point;
-                Console.WriteLine($"Resizing Left: New Width = {_targetControl.Width}");
-            }
+            if (!_isResizing) return;
+
+            var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
+            var deltaX = point.Position.X - _startSizePoint.Position.X;
+            var deltaY = point.Position.Y - _startSizePoint.Position.Y;
+
+            AdjustControlSizeAndPosition(sender as Control, deltaX, deltaY);
+            _startSizePoint = point;
         }
 
-        private void BottomLeftAnchorOnPointerMoved(object? sender, PointerEventArgs e)
+        private void AdjustControlSizeAndPosition(Control? anchor, double deltaX, double deltaY)
         {
-            if (_isResizing)
-            {
-                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-                var deltaX = _startSizePoint.Position.X - point.Position.X;
-                var deltaY = point.Position.Y - _startSizePoint.Position.Y;
-                double newWidth = Math.Max(0, (_targetControl.Width.Equals(double.NaN) ? _targetControl.DesiredSize.Width : _targetControl.Width) + deltaX);
-                double newHeight = Math.Max(0, (_targetControl.Height.Equals(double.NaN) ? _targetControl.DesiredSize.Height : _targetControl.Height) + deltaY);
-                _targetControl.Width = newWidth;
-                _targetControl.Height = newHeight;
-                Canvas.SetLeft(_targetControl, Canvas.GetLeft(_targetControl) - deltaX);
-                _startSizePoint = point;
-                Console.WriteLine($"Resizing BottomLeft: New Width = {_targetControl.Width}, New Height = {_targetControl.Height}");
-            }
-        }
+            double newWidth = _targetControl.Width;
+            double newHeight = _targetControl.Height;
 
-        private void TopRightAnchorOnPointerMoved(object? sender, PointerEventArgs e)
-        {
-            if (_isResizing)
+            if (anchor == TopLeftAnchor || anchor == LeftCenterAnchor || anchor == BottomLeftAnchor)
             {
-                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-                var deltaX = point.Position.X - _startSizePoint.Position.X;
-                var deltaY = _startSizePoint.Position.Y - point.Position.Y;
-                double newWidth = Math.Max(0, (_targetControl.Width.Equals(double.NaN) ? _targetControl.DesiredSize.Width : _targetControl.Width) + deltaX);
-                double newHeight = Math.Max(0, (_targetControl.Height.Equals(double.NaN) ? _targetControl.DesiredSize.Height : _targetControl.Height) + deltaY);
-                _targetControl.Width = newWidth;
-                _targetControl.Height = newHeight;
-                Canvas.SetTop(_targetControl, Canvas.GetTop(_targetControl) - deltaY);
-                _startSizePoint = point;
-                Console.WriteLine($"Resizing TopRight: New Width = {_targetControl.Width}, New Height = {_targetControl.Height}");
+                newWidth = Math.Max(0, (_targetControl.Width.Equals(double.NaN) ? _targetControl.DesiredSize.Width : _targetControl.Width) - deltaX);
+                Canvas.SetLeft(_targetControl, Canvas.GetLeft(_targetControl) + deltaX);
             }
-        }
 
-        private void RightCenterAnchorOnPointerMoved(object? sender, PointerEventArgs e)
-        {
-            if (_isResizing)
+            if (anchor == TopLeftAnchor || anchor == TopCenterAnchor || anchor == TopRightAnchor)
             {
-                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-                var delta = point.Position.X - _startSizePoint.Position.X;
-                double newWidth = Math.Max(0, (_targetControl.Width.Equals(double.NaN) ? _targetControl.DesiredSize.Width : _targetControl.Width) + delta);
-                _targetControl.Width = newWidth;
-                _startSizePoint = point;
-                Console.WriteLine($"Resizing Right: New Width = {_targetControl.Width}");
+                newHeight = Math.Max(0, (_targetControl.Height.Equals(double.NaN) ? _targetControl.DesiredSize.Height : _targetControl.Height) - deltaY);
+                Canvas.SetTop(_targetControl, Canvas.GetTop(_targetControl) + deltaY);
             }
-        }
 
-        private void BottomRightAnchorOnPointerMoved(object? sender, PointerEventArgs e)
-        {
-            if (_isResizing)
+            if (anchor == BottomLeftAnchor || anchor == BottomCenterAnchor || anchor == BottomRightAnchor)
             {
-                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-                var deltaX = point.Position.X - _startSizePoint.Position.X;
-                var deltaY = point.Position.Y - _startSizePoint.Position.Y;
-                double newWidth = Math.Max(0, (_targetControl.Width.Equals(double.NaN) ? _targetControl.DesiredSize.Width : _targetControl.Width) + deltaX);
-                double newHeight = Math.Max(0, (_targetControl.Height.Equals(double.NaN) ? _targetControl.DesiredSize.Height : _targetControl.Height) + deltaY);
-                _targetControl.Width = newWidth;
-                _targetControl.Height = newHeight;
-                _startSizePoint = point;
-                Console.WriteLine($"Resizing BottomRight: New Width = {_targetControl.Width}, New Height = {_targetControl.Height}");
+                newHeight = Math.Max(0, (_targetControl.Height.Equals(double.NaN) ? _targetControl.DesiredSize.Height : _targetControl.Height) + deltaY);
             }
-        }
 
-        private void TopCenterAnchorOnPointerMoved(object? sender, PointerEventArgs e)
-        {
-            if (_isResizing)
+            if (anchor == TopRightAnchor || anchor == RightCenterAnchor || anchor == BottomRightAnchor)
             {
-                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-                var delta = _startSizePoint.Position.Y - point.Position.Y;
-                double newHeight = Math.Max(0, (_targetControl.Height.Equals(double.NaN) ? _targetControl.DesiredSize.Height : _targetControl.Height) + delta);
-                _targetControl.Height = newHeight;
-                Canvas.SetTop(_targetControl, Canvas.GetTop(_targetControl) - delta);
-                _startSizePoint = point;
-                Console.WriteLine($"Resizing Top: New Height = {_targetControl.Height}");
+                newWidth = Math.Max(0, (_targetControl.Width.Equals(double.NaN) ? _targetControl.DesiredSize.Width : _targetControl.Width) + deltaX);
             }
-        }
 
-        private void BottomCenterAnchorOnPointerMoved(object? sender, PointerEventArgs e)
-        {
-            if (_isResizing)
-            {
-                var point = e.GetCurrentPoint((Visual?)_targetControl.Parent);
-                var delta = point.Position.Y - _startSizePoint.Position.Y;
-                double newHeight = Math.Max(0, (_targetControl.Height.Equals(double.NaN) ? _targetControl.DesiredSize.Height : _targetControl.Height) + delta);
-                _targetControl.Height = newHeight;
-                _startSizePoint = point;
-                Console.WriteLine($"Resizing Bottom: New Height = {_targetControl.Height}");
-            }
+            _targetControl.Width = newWidth;
+            _targetControl.Height = newHeight;
         }
 
         private void TargetControlOnLayoutUpdated(object? sender, EventArgs e)
         {
-            // Update decorator size and position to match the target control
             Width = _targetControl.Bounds.Width;
             Height = _targetControl.Bounds.Height;
 
